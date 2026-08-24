@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import vn.spring.pkd.entity.UserRole;
 
+import java.util.List;
+
 public interface UserRoleRepository extends JpaRepository<UserRole, String> {
 //    existsByUserIdAndRoleId()
 @Query("""
@@ -16,6 +18,8 @@ public interface UserRoleRepository extends JpaRepository<UserRole, String> {
 boolean checkUserAndRole(@Param("userId") String userId, @Param("roleId") String roleId);
 
 //    findByUserId()
+List<UserRole> findByUserId(String userId);
+
 //    findByRoleId()
 //    deleteByUserIdAndRoleId()
 //    countByRoleId()

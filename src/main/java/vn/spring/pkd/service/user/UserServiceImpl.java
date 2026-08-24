@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import vn.spring.pkd.dto.request.AssignRoleRequest;
 import vn.spring.pkd.dto.request.user.CreateUserRequest;
 import vn.spring.pkd.dto.request.user.UpdateUserRequest;
-import vn.spring.pkd.dto.response.RoleResponse;
 import vn.spring.pkd.dto.response.RoleSimpleResponse;
 import vn.spring.pkd.dto.response.UserResponse;
 import vn.spring.pkd.entity.Role;
@@ -37,18 +36,7 @@ public class UserServiceImpl implements UserService{
         if(userRepository.checkUserName(createUserRequest.getUsername())){
             throw new RuntimeException("Username already exists");
         }
-//
-//        User user = User.builder()
-//                .firstName(createUserRequest.getFirstName())
-//                .lastName(createUserRequest.getLastName())
-//                .username(createUserRequest.getUsername())
-//                .password(createUserRequest.getPassword())
-//                .dateOfBirth(createUserRequest.getDateOfBirth())
-//                .build();
 
-//        Role role = roleRepository.findById(createUserRequest.getRoleId())
-//                .orElseThrow();
-//
         User user = new User();
         user.setFirstName(createUserRequest.getFirstName());
         user.setLastName(createUserRequest.getLastName());
@@ -57,7 +45,7 @@ public class UserServiceImpl implements UserService{
 
         userRepository.save(user);
 
-        return toResponse(user);
+        return toUserResponse(user, List.of());
     }
 
     @Override
@@ -71,7 +59,9 @@ public class UserServiceImpl implements UserService{
         user.setDateOfBirth(updateUserRequest.getDateOfBirth());
         userRepository.save(user);
 
-        return toResponse(user);
+        List<RoleSimpleResponse> roles = getUserRoles(user.getId());
+
+        return toUserResponse(user, roles);
 
     }
 
@@ -86,14 +76,16 @@ public class UserServiceImpl implements UserService{
     public UserResponse getById(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return toResponse(user);
+
+        List<RoleSimpleResponse> roles = getUserRoles(id);
+        return toUserResponse(user, roles);
     }
 
     @Override
     public List<UserResponse> getAll() {
         return userRepository.findAll()
                 .stream()
-                .map(this::toResponse)
+                .map(user -> toUserResponse(user, getUserRoles((user.getId()))))
                 .toList();
     }
 
@@ -124,19 +116,51 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<RoleSimpleResponse> getUserRoles(String userId) {
+        // B1: Lấy list UserRole theo userId
+        List<UserRole> userRoles = userRoleRepository.findByUserId(userId);
 
-        return List.of();
+        // B2: Trích ra danh sách roleId
+        List<String> roleIds = userRoles.stream()
+                .map(UserRole::getRoleId)
+                .toList();
+
+        // B3: Lấy list Role từ các roleId
+        List<Role> roles = roleRepository.findAllById(roleIds);
+
+        // B4: Map Role → RoleSimpleResponse rồi trả về
+        return roles.stream()
+                .map(role -> RoleSimpleResponse.builder()
+                        .id(role.getId())
+                        .code(role.getRoleCode())   // getRoleCode() → field "code"
+                        .name(role.getRoleName())   // getRoleName()  → field "name"
+                        .build())
+                .toList();
     }
 
-    private UserResponse toResponse(User user){
+    private UserResponse toUserResponse(User user, List<RoleSimpleResponse> roleSimpleResponses){
         return UserResponse.builder()
                 .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .username(user.getUsername())
                 .dateOfBirth(user.getDateOfBirth())
+                .roles(roleSimpleResponses)
                 .build();
     }
+
+//    private AssignRoleResponse toRoleResponse(User user, Role role){
+//        UserRole userRole = new UserRole();
+//
+//        return AssignRoleResponse.builder()
+//                .id(user.getId())
+//                .firstName(user.getFirstName())
+//                .lastName(user.getLastName())
+//                .username(user.getUsername())
+//                .dateOfBirth(user.getDateOfBirth())
+//                .roleCode(role.getRoleCode(userRole.))
+//                .roleName(role.getRoleName())
+//                .build();
+//    }
 
 
 }

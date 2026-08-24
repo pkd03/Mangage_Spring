@@ -6,10 +6,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.spring.pkd.entity.User;
 
-import java.util.List;
-import java.util.Optional;
-
-
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
     @Query("""

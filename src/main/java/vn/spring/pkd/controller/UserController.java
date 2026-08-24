@@ -53,11 +53,17 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/roles")
-    public ResponseEntity<Void> assignRole(@PathVariable String userId, AssignRoleRequest assignRoleRequest){
+    public ResponseEntity<Void> assignRole(@PathVariable String userId, @RequestBody AssignRoleRequest assignRoleRequest){
         userService.assignRole(userId,assignRoleRequest);
 
         return  ResponseEntity.noContent().build();
     }
+
+//    @PostMapping("/{userId}/roles")
+//    ApiResponse<Void> assignRole(@PathVariable String userId, AssignRoleRequest assignRoleRequest){
+//        userService.assignRole(userId, assignRoleRequest);
+//
+//    }
 
 ////////////////////////////////////////////////////////
 
