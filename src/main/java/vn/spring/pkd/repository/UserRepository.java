@@ -6,6 +6,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.spring.pkd.entity.User;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
     @Query("""
@@ -15,5 +17,6 @@ public interface UserRepository extends JpaRepository<User, String> {
 """)
     boolean checkUserName(@Param("username") String username);
 
+    Optional<User> findByUsername(String username);
 
 }

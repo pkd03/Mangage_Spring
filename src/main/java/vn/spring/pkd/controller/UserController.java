@@ -1,9 +1,11 @@
 package vn.spring.pkd.controller;
 
+import ch.qos.logback.classic.Logger;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import vn.spring.pkd.dto.request.ApiResponse;
 import vn.spring.pkd.dto.request.AssignRoleRequest;
@@ -32,6 +34,11 @@ public class UserController {
 
     @GetMapping
     ApiResponse<List<UserResponse>> getAll(){
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        Logger log = null;
+        log.info("Username: {}", authentication.getName());
+        authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
         return ApiResponse.<List<UserResponse>>builder()
                 .result(userService.getAll())
                 .build();

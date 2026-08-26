@@ -5,6 +5,9 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vn.spring.pkd.dto.request.AssignRoleRequest;
 import vn.spring.pkd.dto.request.user.CreateUserRequest;
@@ -29,6 +32,7 @@ public class UserServiceImpl implements UserService{
     UserRepository userRepository;
     RoleRepository roleRepository;
     UserRoleRepository userRoleRepository;
+    PasswordEncoder passwordEncoder;
 
 
     @Override
@@ -41,7 +45,7 @@ public class UserServiceImpl implements UserService{
         user.setFirstName(createUserRequest.getFirstName());
         user.setLastName(createUserRequest.getLastName());
         user.setUsername(createUserRequest.getUsername());
-        user.setPassword(createUserRequest.getPassword());
+        user.setPassword(passwordEncoder.encode(createUserRequest.getPassword()));
 
         userRepository.save(user);
 
@@ -72,6 +76,8 @@ public class UserServiceImpl implements UserService{
         userRepository.delete(user);
     }
 
+    // mỗi user đc xem thông tin của mình, k đc xem của ng khác
+    @PostAuthorize("returnObject.username == authentication.name")
     @Override
     public UserResponse getById(String id) {
         User user = userRepository.findById(id)
@@ -81,6 +87,8 @@ public class UserServiceImpl implements UserService{
         return toUserResponse(user, roles);
     }
 
+    //admin mới đc get list user
+    @PreAuthorize("hasRole('ADMIN')")
     @Override
     public List<UserResponse> getAll() {
         return userRepository.findAll()
@@ -148,19 +156,6 @@ public class UserServiceImpl implements UserService{
                 .build();
     }
 
-//    private AssignRoleResponse toRoleResponse(User user, Role role){
-//        UserRole userRole = new UserRole();
-//
-//        return AssignRoleResponse.builder()
-//                .id(user.getId())
-//                .firstName(user.getFirstName())
-//                .lastName(user.getLastName())
-//                .username(user.getUsername())
-//                .dateOfBirth(user.getDateOfBirth())
-//                .roleCode(role.getRoleCode(userRole.))
-//                .roleName(role.getRoleName())
-//                .build();
-//    }
 
 
 }
