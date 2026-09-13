@@ -17,6 +17,11 @@ public interface UserRepository extends JpaRepository<User, String> {
 """)
     boolean checkUserName(@Param("username") String username);
 
-    Optional<User> findByUsername(String username);
+    @Query("""
+SELECT u
+FROM User u
+WHERE u.username = :username
+""")
+    User findByUsername(@Param("username") String username);
 
 }

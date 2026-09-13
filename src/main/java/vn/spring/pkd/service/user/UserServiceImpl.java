@@ -23,6 +23,7 @@ import vn.spring.pkd.repository.UserRoleRepository;
 
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -46,6 +47,29 @@ public class UserServiceImpl implements UserService{
         user.setLastName(createUserRequest.getLastName());
         user.setUsername(createUserRequest.getUsername());
         user.setPassword(passwordEncoder.encode(createUserRequest.getPassword()));
+
+        userRepository.save(user);
+
+        return toUserResponse(user, List.of());
+    }
+
+    @Override
+    public UserResponse register(CreateUserRequest createUserRequest) {
+//        if(userRepository.checkUserName(createUserRequest.getUsername())){
+//            throw new RuntimeException("Username already exists");
+//        }
+//
+        User user = new User();
+//        user.setFirstName(createUserRequest.getFirstName());
+//        user.setLastName(createUserRequest.getLastName());
+//        user.setUsername(createUserRequest.getUsername());
+//        user.setPassword(passwordEncoder.encode(createUserRequest.getPassword()));
+//
+//        Role customerRole = (Role) roleRepository.findByRoleName("CUSTOMER")
+//                .orElseThrow(() -> new RuntimeException("Role CUSTOMER not found"));
+//
+//        // Set role cho user
+//        user.setRoleList(Collections.singletonList(customerRole));
 
         userRepository.save(user);
 

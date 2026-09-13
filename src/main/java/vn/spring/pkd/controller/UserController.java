@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Logger;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import vn.spring.pkd.dto.request.ApiResponse;
 import vn.spring.pkd.dto.request.AssignRoleRequest;
 import vn.spring.pkd.dto.request.role.CreateRoleRequest;
 import vn.spring.pkd.dto.request.user.CreateUserRequest;
+import vn.spring.pkd.dto.request.user.UpdateUserRequest;
 import vn.spring.pkd.dto.response.RoleResponse;
 import vn.spring.pkd.dto.response.RoleSimpleResponse;
 import vn.spring.pkd.dto.response.UserResponse;
@@ -22,6 +24,7 @@ import java.util.List;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class UserController {
     UserService userService;
 
@@ -36,7 +39,6 @@ public class UserController {
     ApiResponse<List<UserResponse>> getAll(){
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Logger log = null;
         log.info("Username: {}", authentication.getName());
         authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
         return ApiResponse.<List<UserResponse>>builder()
@@ -44,10 +46,16 @@ public class UserController {
                 .build();
     }
 
+    @PutMapping("/{id}")
+    ApiResponse<UserResponse> update(@PathVariable String id, @RequestBody UpdateUserRequest updateUserRequest){
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.update(id, updateUserRequest))
+                .build();
+    }
 
 
     @GetMapping("/{id}")
-    ApiResponse<UserResponse> getById(@PathVariable() String id){
+    ApiResponse<UserResponse> getById(@PathVariable String id){
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getById(id))
                 .build();

@@ -3,8 +3,13 @@ package vn.spring.pkd.service.product;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import vn.spring.pkd.dto.request.product.ProductRequest;
+import vn.spring.pkd.dto.response.PageResponse;
 import vn.spring.pkd.dto.response.ProductResponse;
 import vn.spring.pkd.entity.Product;
 import vn.spring.pkd.repository.ProductRepository;
@@ -69,6 +74,25 @@ public class ProductServiceIml implements ProductService{
                 .map(this::toResponse)
                 .toList();
     }
+
+    @Override
+    public PageResponse<?> getAllWithPage(int pageNo, int pageSize, String sortBy) {
+        Sort sort = Sort.by(sortBy);
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+        Page<Product> products = productRepository.findAllByActiveTrue(pageable);
+        List<Product> productList = products.getContent();
+        return PageResponse.<Product>builder()
+                .page(products.getTotalPages())
+                .total(products.getTotalElements())
+                .rows(productList)
+                .size(products.getSize())
+                .build();
+    }
+
+//    @Override
+//    public Page<ProductResponse> getAllWithPage(Pageable pageable) {
+//        return null;
+//    }
 
     private ProductResponse toResponse(Product product){
         return ProductResponse.builder()

@@ -3,9 +3,13 @@ package vn.spring.pkd.controller;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.query.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import vn.spring.pkd.dto.request.ApiResponse;
 import vn.spring.pkd.dto.request.product.ProductRequest;
+import vn.spring.pkd.dto.response.PageResponse;
 import vn.spring.pkd.dto.response.ProductResponse;
 import vn.spring.pkd.service.product.ProductService;
 
@@ -30,6 +34,14 @@ public class ProductController {
         return ApiResponse.<List<ProductResponse>>builder()
                 .result(productService.getAll())
                 .build();
+    }
+
+    @GetMapping("/page")
+    public PageResponse<?> getAllWithPage(
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(value = "pageNo", defaultValue = "0") int pageNo,
+            @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy) {
+        return productService.getAllWithPage(pageNo, pageSize, sortBy);
     }
 
     @GetMapping("/{id}")

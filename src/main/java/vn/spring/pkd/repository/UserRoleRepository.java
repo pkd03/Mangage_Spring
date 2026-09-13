@@ -20,6 +20,13 @@ boolean checkUserAndRole(@Param("userId") String userId, @Param("roleId") String
 //    findByUserId()
 List<UserRole> findByUserId(String userId);
 
+@Query("""
+SELECT r.roleCode 
+FROM Role r JOIN UserRole ur ON r.id = ur.roleId 
+WHERE ur.userId = :userId AND r.isDelete = false
+""")
+List<String> findRoleCodesByUserId(@Param("userId") String userId);
+
 //    findByRoleId()
 //    deleteByUserIdAndRoleId()
 //    countByRoleId()

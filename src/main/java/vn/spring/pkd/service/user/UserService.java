@@ -14,7 +14,10 @@ import vn.spring.pkd.dto.response.UserResponse;
 import java.util.List;
 
 public interface UserService {
+
     UserResponse create(CreateUserRequest createUserRequest);
+
+    UserResponse register(CreateUserRequest createUserRequest);
 
     UserResponse update(String id, UpdateUserRequest updateUserRequest);
 

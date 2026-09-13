@@ -10,35 +10,45 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import vn.spring.pkd.dto.request.auth.AuthenticationRequest;
 import vn.spring.pkd.dto.request.auth.IntrospectRequest;
+import vn.spring.pkd.dto.request.auth.JwtRequest;
 import vn.spring.pkd.dto.response.AuthenticationResponse;
 import vn.spring.pkd.dto.response.IntrospectResponse;
 import vn.spring.pkd.entity.User;
 import vn.spring.pkd.entity.UserRole;
+import vn.spring.pkd.exception.BusinessException;
 import vn.spring.pkd.repository.UserRepository;
 import vn.spring.pkd.repository.UserRoleRepository;
+import vn.spring.pkd.service.jwt.JwtService;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class AuthenticationServiceIml implements AuthenticationService{
 
 
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
-
+    UserRoleRepository userRoleRepository;
+    JwtService jwtService;
     @NonFinal //Field này không được tự động thêm final.
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
@@ -69,75 +79,42 @@ public class AuthenticationServiceIml implements AuthenticationService{
                 .build();
     }
 
-//    Verify password, gọi generateToken
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
-//        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        var user = userRepository
-                .findByUsername(authenticationRequest.getUsername())
-                .orElseThrow(() -> new RuntimeException("user k tồn tại"));
+    public void logout(JwtRequest jwtRequest) {
 
-//        passwordEncoder.matches(passwordUserNhap, passwordDaHashTrongDB);
-        boolean authenticated = passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
-
-        if (!authenticated) throw new RuntimeException("Unauthenticated");
-
-        var token = generateToken(user);
-
-        return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
 
-
-    //    Tạo JWT HS512
     @Override
-    public String generateToken(User user) {
-        //        JWT = HEADER.PAYLOAD.SIGNATURE
+    public ResponseEntity<?> refresh(JwtRequest jwtRequest) {
+        return null;
+    }
 
-                //        HEADER
-//        HS512 = HMAC + SHA-512 — thuật toán ký đối xứng (dùng 1 secret key để ký và verify).
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+    @Override
+    public AuthenticationResponse sosicalogin(String authencode) {
+        return null;
+    }
 
-                //        PAYLOAD
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getUsername()) // của user nào
-                .issuer("pkd") // phát hành bởi ai
-                .issueTime(new Date()) // time token đc tao
-                //time token hết hạn= time hiện tại(vừa tao) + time duy trì token
-                .expirationTime(new Date(
-                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
-                .jwtID(UUID.randomUUID().toString()) //Mỗi token tạo ra một UUID khác nhau.
-                .claim("userId", "Custom")
-                .build();
+    @Override
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        User user = userRepository.findByUsername(request.getUsername());
+        if(user == null){
+            throw new BusinessException("Nguoi dung khong ton tai", HttpStatus.NOT_FOUND, 404);
+        }
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new BusinessException("Maajt khau khong dung", HttpStatus.BAD_REQUEST, 400);
+        }
+        String token = jwtService.generateToken(user.getUsername(), user);
 
-//khi có jwtClaimsSet thì chuyển thành payload
-        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
-
-//        HEADER +  PAYLOAD +  SECRET KEY  ->  HS512  ->SIGNATURE
-        JWSObject jwsObject = new JWSObject(header, payload);
-
-        try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
-            return jwsObject.serialize();
-        } catch (JOSEException e) {
-            Logger log = null;
-            log.error("Cannot create token", e);
-            throw new RuntimeException(e);
+        if(!StringUtils.hasText(token)){
+            throw new BusinessException("Dang nhap khong thanh cong", HttpStatus.BAD_GATEWAY, 502);
         }
 
+        return AuthenticationResponse.builder()
+                .token(token)
+                .authenticated(true)
+                .build();
+
     }
 
-//    UserRoleRepository userRoleRepository;
-////    Nhúng role + permission vào JWT
-//    private String buildScope(User user) {
-//        StringJoiner stringJoiner = new StringJoiner(" ");
-//        var listRoleByUser = userRoleRepository
-//                .findByUserId(user.getId());
-//        UserRole userRole = new UserRole();
-//        if (!CollectionUtils.isEmpty(listRoleByUser.get))
-//            user.getRoles().forEach(role -> {
-//                stringJoiner.add("ROLE_" + role.getName());
-//            });
-//
-//        return stringJoiner.toString();
-//    }
+
 }
