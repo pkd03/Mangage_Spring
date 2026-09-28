@@ -1,11 +1,6 @@
 package vn.spring.pkd.service.auth;
 
 import ch.qos.logback.classic.Logger;
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,6 +17,7 @@ import vn.spring.pkd.entity.User;
 import vn.spring.pkd.entity.UserRole;
 import vn.spring.pkd.repository.UserRepository;
 import vn.spring.pkd.repository.UserRoleRepository;
+import vn.spring.pkd.service.jwt.JwtService;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -38,6 +34,7 @@ public class AuthenticationServiceIml implements AuthenticationService{
 
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
+    JwtService jwtService;
 
     @NonFinal //Field này không được tự động thêm final.
     @Value("${jwt.signerKey}")
@@ -52,22 +49,7 @@ public class AuthenticationServiceIml implements AuthenticationService{
 //    protected long REFRESHABLE_DURATION;
 
 
-    public IntrospectResponse introspect(IntrospectRequest request)
-            throws JOSEException, ParseException {
-        var token = request.getToken();
 
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        var verified = signedJWT.verify(verifier);
-
-        return IntrospectResponse.builder()
-                .valid(verified && expiryTime.after(new Date()))
-                .build();
-    }
 
 //    Verify password, gọi generateToken
     @Override
@@ -82,49 +64,13 @@ public class AuthenticationServiceIml implements AuthenticationService{
 
         if (!authenticated) throw new RuntimeException("Unauthenticated");
 
-        var token = generateToken(user);
+        var token = jwtService.generateToken(user);
 
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
 
 
-    //    Tạo JWT HS512
-    @Override
-    public String generateToken(User user) {
-        //        JWT = HEADER.PAYLOAD.SIGNATURE
 
-                //        HEADER
-//        HS512 = HMAC + SHA-512 — thuật toán ký đối xứng (dùng 1 secret key để ký và verify).
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-
-                //        PAYLOAD
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getUsername()) // của user nào
-                .issuer("pkd") // phát hành bởi ai
-                .issueTime(new Date()) // time token đc tao
-                //time token hết hạn= time hiện tại(vừa tao) + time duy trì token
-                .expirationTime(new Date(
-                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
-                .jwtID(UUID.randomUUID().toString()) //Mỗi token tạo ra một UUID khác nhau.
-                .claim("userId", "Custom")
-                .build();
-
-//khi có jwtClaimsSet thì chuyển thành payload
-        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
-
-//        HEADER +  PAYLOAD +  SECRET KEY  ->  HS512  ->SIGNATURE
-        JWSObject jwsObject = new JWSObject(header, payload);
-
-        try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
-            return jwsObject.serialize();
-        } catch (JOSEException e) {
-            Logger log = null;
-            log.error("Cannot create token", e);
-            throw new RuntimeException(e);
-        }
-
-    }
 
 //    UserRoleRepository userRoleRepository;
 ////    Nhúng role + permission vào JWT

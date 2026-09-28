@@ -8,12 +8,16 @@ import org.springframework.stereotype.Service;
 import vn.spring.pkd.dto.request.AssignRoleRequest;
 import vn.spring.pkd.dto.request.user.CreateUserRequest;
 import vn.spring.pkd.dto.request.user.UpdateUserRequest;
+import vn.spring.pkd.dto.response.AuthenticationResponse;
 import vn.spring.pkd.dto.response.RoleSimpleResponse;
 import vn.spring.pkd.dto.response.UserResponse;
 
 import java.util.List;
 
 public interface UserService {
+
+    AuthenticationResponse register(CreateUserRequest createUserRequest);
+
     UserResponse create(CreateUserRequest createUserRequest);
 
     UserResponse update(String id, UpdateUserRequest updateUserRequest);

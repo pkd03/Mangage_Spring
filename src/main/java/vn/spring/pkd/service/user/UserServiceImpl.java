@@ -5,6 +5,8 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import vn.spring.pkd.dto.request.AssignRoleRequest;
 import vn.spring.pkd.dto.request.user.CreateUserRequest;
 import vn.spring.pkd.dto.request.user.UpdateUserRequest;
+import vn.spring.pkd.dto.response.AuthenticationResponse;
 import vn.spring.pkd.dto.response.RoleSimpleResponse;
 import vn.spring.pkd.dto.response.UserResponse;
 import vn.spring.pkd.entity.Role;
@@ -20,6 +23,7 @@ import vn.spring.pkd.entity.UserRole;
 import vn.spring.pkd.repository.RoleRepository;
 import vn.spring.pkd.repository.UserRepository;
 import vn.spring.pkd.repository.UserRoleRepository;
+import vn.spring.pkd.service.jwt.JwtService;
 
 
 import java.time.LocalDateTime;
@@ -32,8 +36,34 @@ public class UserServiceImpl implements UserService{
     UserRepository userRepository;
     RoleRepository roleRepository;
     UserRoleRepository userRoleRepository;
+    JwtService jwtService;
     PasswordEncoder passwordEncoder;
 
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    private long validDuration;
+
+
+    @Override
+    public AuthenticationResponse register(CreateUserRequest createUserRequest) {
+        if(userRepository.checkUserName(createUserRequest.getUsername())){
+            throw new RuntimeException("username trùng");
+        }
+
+        User user = User.builder()
+                .firstName(createUserRequest.getFirstName())
+                .lastName(createUserRequest.getLastName())
+                .username(createUserRequest.getUsername())
+                .password(createUserRequest.getPassword())
+                .dateOfBirth(createUserRequest.getDateOfBirth())
+                .build();
+
+        userRepository.save(user);
+
+        // Generate and return JWT token
+        String token = jwtService.generateToken(user);
+        return new AuthenticationResponse(token, true);
+    }
 
     @Override
     public UserResponse create(CreateUserRequest createUserRequest) {

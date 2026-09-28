@@ -1,6 +1,6 @@
 package vn.spring.pkd.controller;
 
-import com.nimbusds.jose.JOSEException;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -33,14 +33,14 @@ public class AuthenticationController {
                 .build();
     }
 
-    AuthenticationServiceIml authenticationServiceIml;
-    @PostMapping("/introspect")
-    ApiResponse<IntrospectResponse> authenticate(@RequestBody IntrospectRequest request)
-            throws ParseException, JOSEException {
-        var result = authenticationServiceIml.introspect(request);
-        return ApiResponse.<IntrospectResponse>builder()
-                .result(result)
-                .build();
-    }
+//    AuthenticationServiceIml authenticationServiceIml;
+//    @PostMapping("/introspect")
+//    ApiResponse<IntrospectResponse> authenticate(@RequestBody IntrospectRequest request)
+//            throws ParseException {
+//        var result = authenticationServiceIml.introspect(request);
+//        return ApiResponse.<IntrospectResponse>builder()
+//                .result(result)
+//                .build();
+//    }
 
 }

@@ -11,6 +11,7 @@ import vn.spring.pkd.dto.request.ApiResponse;
 import vn.spring.pkd.dto.request.AssignRoleRequest;
 import vn.spring.pkd.dto.request.role.CreateRoleRequest;
 import vn.spring.pkd.dto.request.user.CreateUserRequest;
+import vn.spring.pkd.dto.response.AuthenticationResponse;
 import vn.spring.pkd.dto.response.RoleResponse;
 import vn.spring.pkd.dto.response.RoleSimpleResponse;
 import vn.spring.pkd.dto.response.UserResponse;
@@ -24,6 +25,14 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserService userService;
+
+
+    @PostMapping("/register")
+    ApiResponse<AuthenticationResponse> register(@RequestBody CreateUserRequest createUserRequest){
+        return  ApiResponse.<AuthenticationResponse>builder()
+                .result(userService.register(createUserRequest))
+                .build();
+    }
 
     @PostMapping
     ApiResponse<UserResponse> create(@RequestBody CreateUserRequest createUserRequest){

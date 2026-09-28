@@ -19,4 +19,15 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     Optional<User> findByUsername(String username);
 
+//    // Custom JPQL query
+//    @Query("SELECT u FROM User u WHERE u.createdAt >= :date")
+//    List<User> findUsersCreatedAfter(@Param("date") LocalDateTime date);
+//
+//    // Native SQL query
+//    @Query(value = "SELECT * FROM users WHERE active = true AND created_at >= :date",
+//            nativeQuery = true)
+//    List<User> findActiveUsersCreatedAfter(@Param("date") LocalDateTime date);
+// Count queries
+//long countByActiveTrue();
+
 }

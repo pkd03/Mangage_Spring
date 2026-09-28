@@ -6,5 +6,4 @@ import vn.spring.pkd.entity.User;
 
 public interface AuthenticationService {
     AuthenticationResponse authenticate(AuthenticationRequest request);
-    String generateToken(User user);
 }
