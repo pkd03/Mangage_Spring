@@ -1,0 +1,726 @@
+{
+	"info": {
+		"_postman_id": "a9b1c2d3-e4f5-4678-90ab-cdef12345678",
+		"name": "Product Management API Tests",
+		"description": "Bộ test collection Postman đầy đủ cho dự án Study Product Management, cập nhật chính xác theo các controller hiện tại (ProductControllerAdmin và ProductControllerClient), bao gồm toàn bộ luồng nghiệp vụ Thùng rác (Xóa mềm, Xóa cứng, Khôi phục, Trùng lặp mã/tên trong và ngoài thùng rác).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "createdProductId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "softDeletedProductId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "conflictProductId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "01. Admin - Luồng cơ bản (Happy Path)",
+			"item": [
+				{
+					"name": "1.1 Tạo sản phẩm SP001 thành công",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.id) {",
+									"        pm.collectionVariables.set('createdProductId', jsonData.id);",
+									"        console.log('Saved createdProductId:', jsonData.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SP001\",\n    \"name\": \"Bàn phím cơ DareU EK87\",\n    \"description\": \"Bàn phím cơ gaming switch Blue\",\n    \"price\": 590000,\n    \"quantity\": 25\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/admin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin"
+							]
+						}
+					}
+				},
+				{
+					"name": "1.2 Tạo sản phẩm SP002 (dùng để test thùng rác & khôi phục)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.id) {",
+									"        pm.collectionVariables.set('softDeletedProductId', jsonData.id);",
+									"        console.log('Saved softDeletedProductId:', jsonData.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SP002\",\n    \"name\": \"Chuột không dây Logitech G304\",\n    \"description\": \"Chuột gaming không dây 12000 DPI\",\n    \"price\": 790000,\n    \"quantity\": 40\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/admin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin"
+							]
+						}
+					}
+				},
+				{
+					"name": "1.3 Lấy danh sách sản phẩm quản lý (Phân trang & Sort)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin?page=0&size=10&sort=createAt,desc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "createAt,desc"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "1.4 Lấy chi tiết sản phẩm theo ID (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/{{createdProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"{{createdProductId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "1.5 Cập nhật sản phẩm SP001 thành công",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SP001\",\n    \"name\": \"Bàn phím cơ DareU EK87 V2\",\n    \"description\": \"Bàn phím cơ nâng cấp switch Red êm hơn\",\n    \"price\": 650000,\n    \"quantity\": 30,\n    \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/{{createdProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"{{createdProductId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "1.6 Xóa mềm sản phẩm SP002 (chuyển vào thùng rác)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/{{softDeletedProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"{{softDeletedProductId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "1.7 Xem danh sách thùng rác (Admin - Bin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/bin?page=0&size=10&sort=deleteAt,desc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"bin"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "deleteAt,desc"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "1.8 Khôi phục SP002 từ thùng rác (Restore)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/bin/{{softDeletedProductId}}/restore",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"bin",
+								"{{softDeletedProductId}}",
+								"restore"
+							]
+						}
+					}
+				},
+				{
+					"name": "1.9 Xóa mềm lại SP002 để test xóa cứng",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/{{softDeletedProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"{{softDeletedProductId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "1.10 Xóa cứng SP002 (Hard Delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/{{softDeletedProductId}}?hard=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"{{softDeletedProductId}}"
+							],
+							"query": [
+								{
+									"key": "hard",
+									"value": "true"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "02. Client - Luồng khách hàng (Happy Path)",
+			"item": [
+				{
+					"name": "2.1 Khách xem tất cả sản phẩm (Phân trang mặc định)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/client?page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"client"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "2.2 Khách xem chi tiết sản phẩm theo ID (Ẩn code & active)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/client/{{createdProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"client",
+								"{{createdProductId}}"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "03. Nghiệp vụ Thùng rác & Trùng lặp (Thêm / Sửa / Khôi phục)",
+			"item": [
+				{
+					"name": "3.1 Chuẩn bị: Tạo SP_TRASH_TEST",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.id) {",
+									"        pm.collectionVariables.set('conflictProductId', jsonData.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SP_TRASH\",\n    \"name\": \"Sản phẩm test trùng với thùng rác\",\n    \"description\": \"SP này sẽ được chuyển vào thùng rác\",\n    \"price\": 100000,\n    \"quantity\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/admin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin"
+							]
+						}
+					}
+				},
+				{
+					"name": "3.2 Chuẩn bị: Xóa SP_TRASH vào thùng rác",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/{{conflictProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"{{conflictProductId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "3.3 [Nghiệp vụ] Thêm mới TRÙNG code với SP trong thùng rác (Kỳ vọng: THÀNH CÔNG)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SP_TRASH\",\n    \"name\": \"Sản phẩm mới tái sử dụng mã SP_TRASH\",\n    \"description\": \"Code trùng với sản phẩm trong thùng rác nhưng phải tạo thành công\",\n    \"price\": 250000,\n    \"quantity\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/admin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin"
+							]
+						}
+					}
+				},
+				{
+					"name": "3.4 [Nghiệp vụ] Khôi phục SP cũ trong thùng rác bị trùng mã (Kỳ vọng: CHẶN và báo lỗi)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/bin/{{conflictProductId}}/restore",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"bin",
+								"{{conflictProductId}}",
+								"restore"
+							]
+						}
+					}
+				},
+				{
+					"name": "3.5 [Nghiệp vụ] Sửa sản phẩm đang trong thùng rác (Kỳ vọng: CHẶN không cho sửa)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Cố tình sửa SP trong thùng rác\",\n    \"price\": 300000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/{{conflictProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"{{conflictProductId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "3.6 [Nghiệp vụ] Khách xem chi tiết SP đang trong thùng rác (Kỳ vọng: BỊ CHẶN 404/Exception)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/client/{{conflictProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"client",
+								"{{conflictProductId}}"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "04. Các trường hợp lỗi & Validation (Negative Cases)",
+			"item": [
+				{
+					"name": "4.1 Tạo SP - Trùng mã code với sản phẩm đang hoạt động",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SP001\",\n    \"name\": \"Tên khác nhưng trùng mã SP001 đang hoạt động\",\n    \"price\": 100000,\n    \"quantity\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/admin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin"
+							]
+						}
+					}
+				},
+				{
+					"name": "4.2 Tạo SP - Trùng tên với sản phẩm đang hoạt động",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SP_KHAC_01\",\n    \"name\": \"Bàn phím cơ DareU EK87 V2\",\n    \"price\": 120000,\n    \"quantity\": 5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/admin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin"
+							]
+						}
+					}
+				},
+				{
+					"name": "4.3 Cập nhật SP - Sửa trùng mã code của sản phẩm khác",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"SP_TRASH\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/{{createdProductId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"{{createdProductId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "4.4 Cập nhật SP - ID không tồn tại",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"SP không tồn tại\",\n    \"price\": 100000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						}
+					}
+				},
+				{
+					"name": "4.5 Lấy chi tiết SP (Admin) - ID không tồn tại",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						}
+					}
+				},
+				{
+					"name": "4.6 Khôi phục SP - ID không tồn tại",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/bin/00000000-0000-0000-0000-000000000000/restore",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"bin",
+								"00000000-0000-0000-0000-000000000000",
+								"restore"
+							]
+						}
+					}
+				},
+				{
+					"name": "4.7 Xóa mềm SP - ID không tồn tại",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						}
+					}
+				},
+				{
+					"name": "4.8 Xóa cứng SP - ID không tồn tại",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/admin/00000000-0000-0000-0000-000000000000?hard=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"admin",
+								"00000000-0000-0000-0000-000000000000"
+							],
+							"query": [
+								{
+									"key": "hard",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "4.9 Khách xem chi tiết - ID không tồn tại",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/client/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"client",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

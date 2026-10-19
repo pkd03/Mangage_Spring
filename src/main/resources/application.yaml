@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: study
+
+# Data source & JPA config
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+#      ddl-auto=validate: Chỉ validate schema, không tự tạo (khuyên dùng cho production)
+#      ddl-auto=create: Drop và tạo lại schema khi khởi động (chỉ dùng development)
+#      ddl-auto=update: Tự động cập nhật schema (không khuyên dùng production)
+#      show-sql=true: Log SQL statements (tắt ở production)
+      show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+## JWT config
+#jwt:
+#  valid-duration: ${VALID_DURATION}
+#  signerKey: ${SIGNER_KEY}
+#
+## Admin default config
+#admin:
+#  default:
+#    username: ${ADMIN_USERNAME}
+#    password: ${ADMIN_PASSWORD}
+
+
+
+
