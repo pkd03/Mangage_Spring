@@ -12,6 +12,8 @@ import vn.tnteco.study.dto.request.CreateProductRequest;
 import vn.tnteco.study.dto.request.UpdateProductRequest;
 import vn.tnteco.study.dto.response.ProductResponseForAdmin;
 import vn.tnteco.study.dto.response.ProductResponseForClient;
+import vn.tnteco.study.exception.AppException;
+import vn.tnteco.study.exception.ErrorCode;
 import vn.tnteco.study.model.Product;
 import vn.tnteco.study.repository.ProductRepository;
 
@@ -28,7 +30,7 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public ProductResponseForClient getProductByIdForClient(String id) {
         Product product = productRepository.findByIdAndActiveTrueAndIsDeleteFalse(id)
-                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại hoặc đã ngừng kinh doanh"));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         return toResponseForClient(product);
     }
 
@@ -65,10 +67,10 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     public ProductResponseForAdmin createProduct(@RequestBody CreateProductRequest createProductRequest) {
         if(productRepository.existsByNameAndIsDeleteFalse(createProductRequest.getName())){
-            throw new RuntimeException("ProductName already exists");
+            throw new AppException(ErrorCode.PRODUCT_NAME_EXISTED);
         }
         if(productRepository.existsByCodeAndIsDeleteFalse(createProductRequest.getCode())){
-            throw new RuntimeException("ProductCode already exists");
+            throw new AppException(ErrorCode.PRODUCT_CODE_EXISTED);
         }
 
         Product product = Product.builder()
@@ -90,21 +92,21 @@ public class ProductServiceImpl implements ProductService{
             String id, UpdateProductRequest updateProductRequest) {
         // 1. Tìm sản phẩm cần cập nhật (chỉ cho phép sửa sản phẩm chưa bị xóa mềm)
         Product product = productRepository.findByIdAndIsDeleteFalse(id)
-                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại hoặc đã nằm trong thùng rác!"));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         //với name, code k đc trùng nghệp vụ như sau
         // sửa A thành !A đồng thời k trùng với B,C,D,..(các sp khác) thì cập nhật
         // 2. Kiểm tra trùng tên (Chỉ kiểm tra nếu tên mới khác tên cũ)
         if (updateProductRequest.getName() != null && !updateProductRequest.getName().equals(product.getName())) {
             if (productRepository.existsByNameAndIsDeleteFalse(updateProductRequest.getName())) {
-                throw new RuntimeException("Tên sản phẩm đã tồn tại!");
+                throw new AppException(ErrorCode.PRODUCT_NAME_EXISTED);
             }
             product.setName(updateProductRequest.getName());
         }
         // 3. Kiểm tra trùng mã code (Chỉ kiểm tra nếu code mới khác code cũ)
         if (updateProductRequest.getCode() != null && !updateProductRequest.getCode().equals(product.getCode())) {
             if (productRepository.existsByCodeAndIsDeleteFalse(updateProductRequest.getCode())) {
-                throw new RuntimeException("Mã sản phẩm (code) đã tồn tại!");
+                throw new AppException(ErrorCode.PRODUCT_CODE_EXISTED);
             }
             product.setCode(updateProductRequest.getCode());
         }
@@ -153,14 +155,14 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     public void restoreProduct(String id) {
         Product product = productRepository.findByIdAndIsDeleteTrue(id)
-                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         // 1. Kiểm tra mã của sản phẩm này có bị trùng với SP nào đang ở ngoài không
         if (productRepository.existsByCodeAndIsDeleteFalse(product.getCode())) {
-            throw new RuntimeException("Không thể khôi phục! Mã sản phẩm [" + product.getCode() + "] hiện đã được sử dụng bởi một sản phẩm khác đang hoạt động.");
+            throw new AppException(ErrorCode.PRODUCT_RESTORE_CONFLICT);
         }
         // 2. Kiểm tra tên có bị trùng không
         if (productRepository.existsByNameAndIsDeleteFalse(product.getName())) {
-            throw new RuntimeException("Không thể khôi phục! Tên sản phẩm [" + product.getName() + "] hiện đã được sử dụng bởi một sản phẩm khác đang hoạt động.");
+            throw new AppException(ErrorCode.PRODUCT_RESTORE_CONFLICT);
         }
         // 3. Nếu không trùng gì thì mới khôi phục
         product.setDelete(false);
@@ -173,7 +175,7 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     public void deleteProduct(String id) {
         productRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         productRepository.deleteById(id);
     }
@@ -182,7 +184,7 @@ public class ProductServiceImpl implements ProductService{
     public ProductResponseForAdmin getProductByIdForAdmin(String id) {
     //dùng findById để xem chi tiết các sp trong/ngoài thùng rác
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với id: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         return toResponseForAdmin(product);
     }
 

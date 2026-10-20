@@ -1,5 +1,6 @@
 package vn.tnteco.study.controller;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,7 +22,7 @@ public class ProductControllerAdmin {
     ProductService productService;
     @PostMapping
     public ProductResponseForAdmin createProduct(
-            @RequestBody CreateProductRequest createProductRequest){
+            @Valid @RequestBody CreateProductRequest createProductRequest){
         return productService.createProduct(createProductRequest);
     }
 

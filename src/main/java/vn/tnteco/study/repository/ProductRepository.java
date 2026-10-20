@@ -31,8 +31,6 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     boolean existsByCodeAndIsDeleteFalse(String code);
 
 
-
-
 //    Xem danh sách quản lý: isDelete = false (lọc được theo active = true/false).
     Page<Product> findByIsDeleteFalse(Pageable pageable);
 
