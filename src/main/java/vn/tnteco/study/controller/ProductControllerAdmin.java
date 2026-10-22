@@ -8,18 +8,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import vn.tnteco.study.dto.request.CreateProductRequest;
-import vn.tnteco.study.dto.request.UpdateProductRequest;
-import vn.tnteco.study.dto.response.ProductResponseForAdmin;
+import vn.tnteco.study.dto.request.product.CreateProductRequest;
+import vn.tnteco.study.dto.request.product.UpdateProductRequest;
+import vn.tnteco.study.dto.response.product.ProductResponseForAdmin;
 import vn.tnteco.study.service.product.ProductService;
 
 @RestController
-@RequestMapping("/products/admin")
+@RequestMapping("/api/admin/products")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@PreAuthorize("hasRole('ADMIN')")
 public class ProductControllerAdmin {
     ProductService productService;
+
     @PostMapping
     public ProductResponseForAdmin createProduct(
             @Valid @RequestBody CreateProductRequest createProductRequest){
@@ -32,6 +35,7 @@ public class ProductControllerAdmin {
         return productService.updateProduct(id, updateProductRequest);
     }
 
+    @PreAuthorize("hasRole('STAFF')")
     @GetMapping
     public Page<ProductResponseForAdmin> getAllForAdmin(
             @PageableDefault(page = 0, size = 10, sort = "createAt", direction = Sort.Direction.DESC)
@@ -39,6 +43,7 @@ public class ProductControllerAdmin {
         return productService.getAllForAdmin(pageable);
     }
 
+    @PreAuthorize("hasRole('STAFF')")
     @GetMapping("/{id}")
     public ProductResponseForAdmin getProductByIdForAdmin(@PathVariable String id) {
         return productService.getProductByIdForAdmin(id);

@@ -2,14 +2,10 @@ package vn.tnteco.study.service.product;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import vn.tnteco.study.dto.request.CreateProductRequest;
-import vn.tnteco.study.dto.request.UpdateProductRequest;
-import vn.tnteco.study.dto.response.ProductResponseForAdmin;
-import vn.tnteco.study.dto.response.ProductResponseForClient;
-import vn.tnteco.study.model.Product;
-
-import java.util.List;
+import vn.tnteco.study.dto.request.product.CreateProductRequest;
+import vn.tnteco.study.dto.request.product.UpdateProductRequest;
+import vn.tnteco.study.dto.response.product.ProductResponseForAdmin;
+import vn.tnteco.study.dto.response.product.ProductResponseForClient;
 
 public interface ProductService {
 //  với khách hàng:

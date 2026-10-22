@@ -1,4 +1,4 @@
-package vn.tnteco.study.dto.response;
+package vn.tnteco.study.dto.response.product;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,11 +10,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductResponseForAdmin {
-    String id;
-
-    String code;
-
+public class ProductResponseForClient {
     String name;
 
     String description;
@@ -22,8 +18,4 @@ public class ProductResponseForAdmin {
     BigDecimal price;
 
     Integer quantity;
-
-    Boolean active;
-
-    boolean isDelete;
 }

@@ -8,17 +8,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
-import vn.tnteco.study.dto.request.CreateProductRequest;
-import vn.tnteco.study.dto.request.UpdateProductRequest;
-import vn.tnteco.study.dto.response.ProductResponseForAdmin;
-import vn.tnteco.study.dto.response.ProductResponseForClient;
+import vn.tnteco.study.dto.request.product.CreateProductRequest;
+import vn.tnteco.study.dto.request.product.UpdateProductRequest;
+import vn.tnteco.study.dto.response.product.ProductResponseForAdmin;
+import vn.tnteco.study.dto.response.product.ProductResponseForClient;
 import vn.tnteco.study.exception.AppException;
 import vn.tnteco.study.exception.ErrorCode;
 import vn.tnteco.study.model.Product;
 import vn.tnteco.study.repository.ProductRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

@@ -15,7 +15,13 @@ public enum ErrorCode {
     PRODUCT_NAME_EXISTED(2002, "Tên sản phẩm đã tồn tại trong hệ thống", HttpStatus.CONFLICT),
     PRODUCT_CODE_EXISTED(2003, "Mã sản phẩm (code) đã tồn tại trong hệ thống", HttpStatus.CONFLICT),
     PRODUCT_IN_TRASH_CANNOT_EDIT(2004, "Sản phẩm đã nằm trong thùng rác, không được phép chỉnh sửa", HttpStatus.BAD_REQUEST),
-    PRODUCT_RESTORE_CONFLICT(2005, "Không thể khôi phục vì mã hoặc tên sản phẩm đã được sử dụng bởi sản phẩm khác", HttpStatus.CONFLICT);
+    PRODUCT_RESTORE_CONFLICT(2005, "Không thể khôi phục vì mã hoặc tên sản phẩm đã được sử dụng bởi sản phẩm khác", HttpStatus.CONFLICT),
+
+    // 3. Nhóm lỗi xác thực
+    PATH_NOT_FOUND(1003, "Đường dẫn không tồn tại", HttpStatus.NOT_FOUND),
+    UNAUTHENTICATED(1004, "Chưa xác thực hoặc token không hợp lệ", HttpStatus.UNAUTHORIZED),
+    UNAUTHORIZED(1005, "Bạn không có quyền truy cập tài nguyên này", HttpStatus.FORBIDDEN);
+
     private final int code;
     private final String message;
     private final HttpStatusCode statusCode;

@@ -1,18 +1,20 @@
-package vn.tnteco.study.dto.response;
+package vn.tnteco.study.dto.response.product;
 
-import jakarta.persistence.Column;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductResponseForClient {
+public class ProductResponseForAdmin {
+    String id;
+
+    String code;
+
     String name;
 
     String description;
@@ -20,4 +22,8 @@ public class ProductResponseForClient {
     BigDecimal price;
 
     Integer quantity;
+
+    Boolean active;
+
+    boolean isDelete;
 }

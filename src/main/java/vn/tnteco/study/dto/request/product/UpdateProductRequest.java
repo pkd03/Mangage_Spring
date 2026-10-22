@@ -1,4 +1,4 @@
-package vn.tnteco.study.dto.request;
+package vn.tnteco.study.dto.request.product;
 
 import jakarta.validation.constraints.*;
 import lombok.*;

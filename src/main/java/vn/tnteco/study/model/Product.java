@@ -2,6 +2,7 @@ package vn.tnteco.study.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,41 +16,42 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
-    private String id;
+    String id;
 
     @Column(name = "code", nullable = false, length = 20)
-    private String code;
+    String code;
 
     @Column(name = "name", nullable = false, length = 150)
-    private String name;
+    String name;
 
     @Column(name = "description", length = 1000)
-    private String description;
+    String description;
 
     @Column(name = "price", nullable = false, precision = 15, scale = 3)
-    private BigDecimal price;
+    BigDecimal price;
 
     @Column(name = "quantity", nullable = false)
-    private Integer quantity;
+    Integer quantity;
 
     @Column(name = "active")
-    private Boolean active;
+    Boolean active;
 
     @Column(name = "create_at", nullable = false, updatable = false)
-    private LocalDateTime createAt;
+    LocalDateTime createAt;
 
     @Column(name = "update_at")
-    private LocalDateTime updateAt;
+    LocalDateTime updateAt;
 
     @Column(name = "delete_at")
-    private LocalDateTime deleteAt;
+    LocalDateTime deleteAt;
 
     @Column(name = "is_delete")
-    private boolean isDelete;
+    boolean isDelete;
 
     //    @PrePersist: Tự động chạy method gán createAt = LocalDateTime.now()
 //    và isDelete = false ngay trước khi câu lệnh INSERT SQL được thực thi.
